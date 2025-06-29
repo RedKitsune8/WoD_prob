@@ -8,18 +8,14 @@ def hunter_success_prob(n, difficulty, k):
     
     total_prob = 0.0
     
-    # total_successes includes critical bonuses from 10s pairing
-    # But to handle that properly, we iterate over number of 10s rolled
     for t in range(0, n + 1):  # number of 10s rolled
         critical_bonus = 2 * (t // 2)  # +2 successes per pair of 10s
         min_possible_successes = t + critical_bonus
-        max_possible_successes = t + critical_bonus + (n - t)  # all non-10 dice succeed
+        max_possible_successes = t + critical_bonus + (n - t)
         
-        # total successes must be >= k and in the possible range for this t
         min_needed_non_10_successes = max(0, k - min_possible_successes)
         max_needed_non_10_successes = min(n - t, max_possible_successes - min_possible_successes)
         
-        # sum probabilities of having i non-10 successes where i ranges from min_needed_non_10_successes to max_needed_non_10_successes
         for i in range(min_needed_non_10_successes, max_needed_non_10_successes + 1):
             total_successes = t + critical_bonus + i
             if total_successes >= k:
@@ -29,12 +25,23 @@ def hunter_success_prob(n, difficulty, k):
 
     return total_prob
 
-st.title("Hunter 5e Dice Pool Probability Calculator with Critical 10s")
+st.title("Hunter 5e Dice Pool Probability Calculator with Criticals")
 
 n = st.number_input("Number of Dice (n)", min_value=1, value=5)
 difficulty = st.number_input("Difficulty (X to 10)", min_value=2, max_value=10, value=6)
-k = st.number_input("Successes Needed (k)", min_value=0, max_value=n*3, value=2)
+k = st.number_input("Successes Needed (k)", min_value=0, max_value=n*3, value=3)
 
 prob = hunter_success_prob(n, difficulty, k)
 
-st.write(f"Probability of at least {k} successes (including criticals) with {n} dice at difficulty {difficulty}: **{prob:.2%}**")
+# Color-coded display with your custom thresholds
+if prob < 0.25:
+    color = "#dc3545"  # red
+elif prob < 0.45:
+    color = "#fd7e14"  # orange
+elif prob < 0.75:
+    color = "#ffc107"  # yellow
+else:
+    color = "#28a745"  # green
+
+st.markdown(f"<h2 style='color:{color}; font-weight:bold;'>Probability: {prob:.2%}</h2>", unsafe_allow_html=True)
+
